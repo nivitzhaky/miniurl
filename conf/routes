@@ -9,6 +9,7 @@ GET			/:miniurl								    controllers.MiniUrlController.myredirect(miniurl : St
 GET			/api/miniurls								    controllers.MiniUrlController.list(user : Option[String])
 GET			/api/miniurls/:miniurl								    controllers.MiniUrlController.miniDetails(miniurl : String)
 DELETE			/api/miniurls/:miniurl								    controllers.MiniUrlController.delete(miniurl : String)
+PUT			/api/miniurls/:miniurl								    controllers.MiniUrlController.update(miniurl : String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET			/assets/*file				controllers.Assets.versioned(path="/public", file: Asset)

@@ -49,6 +49,16 @@ class E2ESpec extends PlaySpecification {
       contentAsString(res2).contains(mini) should_== (true)
     }
 
+    "modify works" in new WithApplication() {
+      val r = generateMiniUrl("www.google.com", "google")
+      val mini = (contentAsJson(r.miniUrlRes) \ "postfix").get.as[String]
+
+      val newAlias = UUID.randomUUID().toString
+      call(r.controller.update(mini), FakeRequest(PUT, "/").withJsonBody(Json.obj("alias" ->newAlias)))
+      val res2 = call(r.controller.miniDetails(mini), FakeRequest(GET, "/"))
+      contentAsString(res2).contains(newAlias) should_== (true)
+    }
+
     "delete works" in new WithApplication() {
       val r = generateMiniUrl("www.google.com", "google")
       val mini = (contentAsJson(r.miniUrlRes) \ "postfix").get.as[String]
@@ -81,6 +91,13 @@ class E2ESpec extends PlaySpecification {
     "fail for invalid url" in new WithApplication() {
       val r = generateMiniUrl("goo", "google")
       status(r.miniUrlRes) mustEqual INTERNAL_SERVER_ERROR
+    }
+
+    "redirect to invalid miniurl fails" in new WithApplication() {
+      val controller = new MiniUrlController(as);
+      var request = FakeRequest(GET, "/")
+      val res= call(controller.myredirect("nonexisting"),request)
+      status(res) mustEqual NOT_FOUND
     }
   }
 

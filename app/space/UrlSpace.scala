@@ -29,7 +29,6 @@ case class Bookmark(url: String, alias: String, clicks: Integer = 0, user: Optio
       Await.result(WS.url(getUrl()).get(), Duration.Inf)
     }.map(x => this).recover {
       case e: Throwable =>
-        println("Invalid URL:" + url)
         throw new RuntimeException("Invalid URL or unreachable:" + url)
     }
   }
@@ -89,8 +88,3 @@ class UrlGenerator(db: UrlMongoPersistence) extends Actor {
   }
 }
 
-object test extends App {
-  val b = Bookmark("niv", "niv")
-  val x = new URL("http://niv")
-  println(b.validate())
-}

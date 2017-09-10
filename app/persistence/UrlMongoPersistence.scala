@@ -38,29 +38,26 @@ class UrlMongoPersistence(dbName: String) extends MongoUtils {
   }
 
   def getUrlByMini(miniurl: String, incClicks: Boolean = false): Bookmark = {
-    println("getbymini:" + miniurl + "->" + dbName)
     val res = if (incClicks) {
       db(urls).findAndModify(MDB("_id" -> miniurl), MDB("_id" -> 0), MDB("$inc" -> MDB("clicks" -> 1))).map(x => dbObjTo[Bookmark](x)).head
     } else {
       db(urls).findOne(MDB("_id" -> miniurl), MDB("_id" -> 0)).map(x => dbObjTo[Bookmark](x)).get
     }
-    println(res)
     res
   }
   def getUrlByUser(user: String) = {
-    val res = db(urls).find(MDB("user" -> user)).map(x => dbObjTo[MongoBookmark](x)).toList
-    println(res)
-    res
+    db(urls).find(MDB("user" -> user)).map(x => dbObjTo[MongoBookmark](x)).toList
   }
 
   def getUsedUrls(user: Option[String]): List[MongoBookmark] = {
     val filter = List("url" -> MDB("$exists" -> true)) ++ user.map(x => "user" -> x).toList
-    val res = db(urls).find(MDB(filter)).map(x => dbObjTo[MongoBookmark](x)).toList
-    println(res)
-    res
+    db(urls).find(MDB(filter)).map(x => dbObjTo[MongoBookmark](x)).toList
   }
   def deleteMiniUrl(miniurl: String) = {
     db(urls).remove(MDB("_id" -> miniurl))
+  }
+  def updateAlias(miniurl: String, alias: String) = {
+    db(urls).update(MDB("_id" -> miniurl), MDB("$set" -> MDB("alias" -> alias)))
   }
 
   def createIndexes() = {
@@ -89,18 +86,7 @@ case class MiniUrlGen(db: UrlMongoPersistence, length: Integer = 6) {
     if (times == 0) throw new RuntimeException("Unable to create a key")
     Try { f }.recover {
       case e: Throwable =>
-        println(e.getMessage)
         tryXTimes(f, times - 1)
     }.get
   }
-}
-
-object testPersist extends App {
-  val db = new UrlMongoPersistence(DBName.miniurl)
-  //  val gen = MiniUrlGen(db);
-  //
-  //  (1 to 1).foreach(x => gen.genUrl())
-  //  println(gen.totalTimeInside)
-  println(db.getUrlByMini("UzKVZT"))
-
 }

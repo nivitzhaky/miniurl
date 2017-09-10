@@ -22,6 +22,7 @@ import utils._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+case class JustAlias(alias: String)
 
 @Singleton
 class MiniUrlController @Inject() (system: ActorSystem) extends Controller with Json4s with Eventually {
@@ -47,7 +48,6 @@ class MiniUrlController @Inject() (system: ActorSystem) extends Controller with 
       }.map(x => Ok(Json.obj("postfix" -> x.postfix, "link" -> s"$domain/${x.postfix}")).withHeaders(headers: _*))
         .recover {
           case e: Throwable =>
-            println(e.getMessage)
             Results.InternalServerError(Json.obj("error" -> e.getMessage)).withHeaders(headers: _*)
         }.get
     }
@@ -55,26 +55,17 @@ class MiniUrlController @Inject() (system: ActorSystem) extends Controller with 
 
   def myredirect(miniurl: String) = Action { implicit request =>
     try {
-      println("beforreeee!!! redirect")
       val bookmark = mongoPersistence.getUrlByMini(miniurl, true)
-      println(bookmark.getUrl())
-      val res = Results.MovedPermanently(bookmark.getUrl()).withHeaders(headers: _*)
-      println(res)
-      res
+      Results.MovedPermanently(bookmark.getUrl()).withHeaders(headers: _*)
     } catch {
       case e: Throwable =>
-        e.printStackTrace()
         Results.NotFound(Json.obj()).withHeaders(headers: _*)
     }
   }
 
   def list(user: Option[String] = None) = Action { implicit request =>
-    println("beforreeee!!! redirect")
     val bookmarks = mongoPersistence.getUsedUrls(user).map(x => UiBookmark.fromMongoBookmark(x))
-    println(bookmarks)
-    val res = Ok((Extraction.decompose(bookmarks))).withHeaders(headers: _*)
-    println(res)
-    res
+    Ok((Extraction.decompose(bookmarks))).withHeaders(headers: _*)
   }
 
   def delete(miniurl: String) = Action { implicit request =>
@@ -82,13 +73,16 @@ class MiniUrlController @Inject() (system: ActorSystem) extends Controller with 
     Ok(Json.obj())
   }
 
+  def update(miniurl: String) = Action(json) { implicit request =>
+    val a = request.body.extract[JustAlias]
+    mongoPersistence.updateAlias(miniurl, a.alias)
+    Ok(Json.obj())
+
+  }
+
   def miniDetails(miniurl: String) = Action { implicit request =>
-    println("beforreeee!!! redirect")
     val bookmarks = mongoPersistence.getUrlByMini(miniurl)
-    println(bookmarks)
-    val res = Ok(Extraction.decompose(UiBookmark.fromBookmark(bookmarks, miniurl))).withHeaders(headers: _*)
-    println(res)
-    res
+    Ok(Extraction.decompose(UiBookmark.fromBookmark(bookmarks, miniurl))).withHeaders(headers: _*)
   }
 
   private def getMiniUrlFromUrlSpace(book: Bookmark) = {
