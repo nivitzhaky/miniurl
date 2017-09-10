@@ -55,8 +55,10 @@ class E2ESpec extends PlaySpecification {
 
       val newAlias = UUID.randomUUID().toString
       call(r.controller.update(mini), FakeRequest(PUT, "/").withJsonBody(Json.obj("alias" ->newAlias)))
-      val res2 = call(r.controller.miniDetails(mini), FakeRequest(GET, "/"))
-      contentAsString(res2).contains(newAlias) should_== (true)
+      Utils.tryForTwentySeconds {
+        val res2 = call(r.controller.miniDetails(mini), FakeRequest(GET, "/"))
+        (contentAsJson(res2) \ "alias").get.as[String] should_== (newAlias)
+      }
     }
 
     "delete works" in new WithApplication() {
