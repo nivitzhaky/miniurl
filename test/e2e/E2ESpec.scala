@@ -54,7 +54,7 @@ class E2ESpec extends PlaySpecification {
       val mini = (contentAsJson(r.miniUrlRes) \ "postfix").get.as[String]
 
       val newAlias = UUID.randomUUID().toString
-      call(r.controller.update(mini), FakeRequest(PUT, "/").withJsonBody(Json.obj("alias" ->newAlias)))
+      call(r.controller.update(mini), FakeRequest(PUT, "/").withJsonBody(Json.obj("alias" -> newAlias)))
       Utils.tryForTwentySeconds {
         val res2 = call(r.controller.miniDetails(mini), FakeRequest(GET, "/"))
         (contentAsJson(res2) \ "alias").get.as[String] should_== (newAlias)
@@ -98,7 +98,7 @@ class E2ESpec extends PlaySpecification {
     "redirect to invalid miniurl fails" in new WithApplication() {
       val controller = new MiniUrlController(as);
       var request = FakeRequest(GET, "/")
-      val res= call(controller.myredirect("nonexisting"),request)
+      val res = call(controller.myredirect("nonexisting"), request)
       status(res) mustEqual NOT_FOUND
     }
   }

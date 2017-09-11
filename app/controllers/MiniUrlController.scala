@@ -32,7 +32,7 @@ class MiniUrlController @Inject() (system: ActorSystem) extends Controller with 
   val domain = current.configuration.getString("server.domain").get
   val poolmax = current.configuration.getInt("pool.max").get
   val poolmin = current.configuration.getInt("pool.min").get
-  val db = DBName.miniurl //current.configuration.getString("database.name").get
+  val db = current.configuration.getString("database.name").get
   val mongoPersistence = new UrlMongoPersistence(db)
   var urlSpace: ActorRef = _
   implicit val timeout = akka.util.Timeout(5 second)
