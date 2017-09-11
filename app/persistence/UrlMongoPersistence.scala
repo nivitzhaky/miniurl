@@ -38,10 +38,9 @@ class UrlMongoPersistence(dbName: String) extends MongoUtils {
   }
 
   def getUrlByMini(miniurl: String, incClicks: Boolean = false): Bookmark = {
-    val res = if (incClicks) {
-      db(urls).findAndModify(MDB("_id" -> miniurl), MDB("_id" -> 0), MDB("$inc" -> MDB("clicks" -> 1))).map(x => dbObjTo[Bookmark](x)).head
-    } else {
-      db(urls).findOne(MDB("_id" -> miniurl), MDB("_id" -> 0)).map(x => dbObjTo[Bookmark](x)).get
+    val res = db(urls).findOne(MDB("_id" -> miniurl), MDB("_id" -> 0)).map(x => dbObjTo[Bookmark](x)).get
+    if (incClicks) {
+      db(urls).update(MDB("_id" -> miniurl), MDB("$inc" -> MDB("clicks" -> 1)))
     }
     res
   }
