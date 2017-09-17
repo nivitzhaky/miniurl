@@ -33,7 +33,7 @@ case class Bookmark(url: String, alias: String, clicks: Integer = 0, user: Optio
     }
   }
   def getAsMongoFields(): DBObject = {
-    val fields = List("url" -> url, "alias" -> alias, "clicks" -> clicks)
+    val fields = List("url" -> url, "alias" -> alias, "clicks" -> clicks, "timestamp" -> System.currentTimeMillis())
     MongoDBObject(fields ++ user.map(x => ("user" -> x)).toList)
   }
 

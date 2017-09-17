@@ -70,13 +70,13 @@ class MiniUrlController @Inject() (system: ActorSystem) extends Controller with 
 
   def delete(miniurl: String) = Action { implicit request =>
     mongoPersistence.deleteMiniUrl(miniurl)
-    Ok(Json.obj())
+    Ok(Json.obj()).withHeaders(headers: _*)
   }
 
   def update(miniurl: String) = Action(json) { implicit request =>
     val a = request.body.extract[JustAlias]
     mongoPersistence.updateAlias(miniurl, a.alias)
-    Ok(Json.obj())
+    Ok(Json.obj()).withHeaders(headers: _*)
 
   }
 

@@ -1,5 +1,7 @@
 package junit
 
+import java.util.UUID
+
 import akka.actor.{ ActorSystem, Props }
 import akka.pattern.ask
 import org.specs2.matcher.{ MustMatchers, MustThrownExpectations }
@@ -19,6 +21,7 @@ trait UrlTestContext extends Scope with MustThrownExpectations {
   val book1 = Bookmark("www.google.com", "google")
   val db = new UrlMongoPersistence("test_mini_url")
   db.db.collectionNames()
+  val userid = UUID.randomUUID().toString
 
   val urlGen = MiniUrlGen(db)
 

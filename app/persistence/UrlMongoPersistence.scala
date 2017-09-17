@@ -50,7 +50,7 @@ class UrlMongoPersistence(dbName: String) extends MongoUtils {
 
   def getUsedUrls(user: Option[String]): List[MongoBookmark] = {
     val filter = List("url" -> MDB("$exists" -> true)) ++ user.map(x => "user" -> x).toList
-    db(urls).find(MDB(filter)).map(x => dbObjTo[MongoBookmark](x)).toList
+    db(urls).find(MDB(filter)).sort(MDB("timestamp" -> -1)).map(x => dbObjTo[MongoBookmark](x)).toList
   }
   def deleteMiniUrl(miniurl: String) = {
     db(urls).remove(MDB("_id" -> miniurl))

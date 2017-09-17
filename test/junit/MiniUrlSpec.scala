@@ -10,12 +10,10 @@ import persistence.MiniUrlGen
 import space._
 
 import scala.concurrent.duration._
-import scala.util.Random
 
 class MiniUrlSpec extends Specification with ResultMatchers with MatcherMacros with MustMatchers {
 
   import util.Utils._
-
   implicit val formats = new DefaultFormats {}
   implicit val as = ActorSystem("ForTest")
   implicit val timeout = akka.util.Timeout(5 second)
@@ -34,6 +32,13 @@ class MiniUrlSpec extends Specification with ResultMatchers with MatcherMacros w
     "Non empty Space is returning data" in new UrlTestContext {
       val space = givenInitializedUrlSpace(as, 10)
       (1 to 10).foreach(x => waitForMini(space ? GetUrlFor(book1)))
+    }
+    "We get the mini urls by order of insertion" in new UrlTestContext {
+      val space = givenInitializedUrlSpace(as, 10)
+      val inserted = (1 to 10).map(x => book1.copy(user = Some(userid))).map(b => waitForMini(space ? GetUrlFor(b)))
+        .map(u => u.postfix).reverse.toList
+      val fromDB = db.getUsedUrls(Some(userid)).take(10).map(u => u._id)
+      inserted should_== (fromDB)
     }
 
     "taken miniurl returns the same data" in new UrlTestContext {
